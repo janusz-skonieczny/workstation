@@ -1,0 +1,28 @@
+# ----------------------------------------------------------------------------
+# Meeting mode — continuous call transcription (managed by workstation
+# steps/59-voxtype.sh). Drives `voxtype meeting …` via the meeting-* fish
+# functions. loopback_device="auto" captures SYSTEM audio (the remote side of
+# a call) so it works for any app — Slack huddle, Google Chat/Meet, Zoom.
+# ----------------------------------------------------------------------------
+[meeting]
+enabled = true
+chunk_duration_secs = 30
+retain_audio = false
+max_duration_mins = 180
+
+[meeting.audio]
+# Pinned per-meeting by `meeting-start` (prompts for the active mic, then
+# restarts the daemon only when the choice changes — no hot-reload).
+mic_device = "default"
+# "auto" = capture remote participants (system output); "disabled" = mic only
+loopback_device = "auto"
+# "auto" = GTCRN neural enhancement removes your speaker bleed from the mic
+echo_cancel = "auto"
+vad_threshold = 0.01
+
+[meeting.diarization]
+enabled = true
+# "simple" attributes speech as You (mic) vs Remote (loopback); "ml" separates
+# individual remote speakers (heavier, downloads an ONNX model on first use)
+backend = "simple"
+max_speakers = 10
