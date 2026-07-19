@@ -32,6 +32,7 @@ run steps/57-cargo.sh
 run steps/58-uv.sh
 run steps/59-piper.sh
 run steps/59a-kokoro.sh
+run steps/59-voxtype.sh
 run steps/60-shell.sh
 run steps/62-agents.sh
 run steps/70-desktop.sh
