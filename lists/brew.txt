@@ -1,8 +1,5 @@
---cask beyond-compare
 --cask lm-studio
---cask obsidian
 age
-asdf
 aws-vault
 chezmoi
 codex
@@ -31,4 +28,5 @@ supabase/tap/supabase
 vercel-cli
 watchman
 uv
+worktrunk
 yq

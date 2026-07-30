@@ -40,7 +40,6 @@ gparted
 graphviz
 handbrake
 handbrake-cli
-hr
 htop
 influxdb-client
 inkscape
@@ -60,7 +59,7 @@ libffi-dev
 libfreexl-dev
 libgdal-dev
 libgraphviz-dev
-libgtk
+libgtk-3-0t64
 libjpeg62
 libksysguardformatter1
 libksysguardsensorfaces1
@@ -80,11 +79,9 @@ libsnappy-dev
 libsqlite3-dev
 libsqlite3-mod-spatialite
 libssl-dev
-libusb
-libwebkit2gtk
 libxml2-dev
 libxmlsec1-dev
-libxmlsec1t64-openssl
+libxmlsec1-openssl1
 llvm
 lm-sensors
 lsd
@@ -97,7 +94,6 @@ nano
 net-tools
 network-manager-openvpn
 nfs-common
-nvidia-driver
 nvme-cli
 oathtool
 obs-studio
@@ -105,7 +101,6 @@ openssh-server
 pandoc
 pavucontrol
 pcscd
-pinta
 pipx
 playerctl
 postgresql-client-common

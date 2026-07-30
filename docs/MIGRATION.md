@@ -51,12 +51,57 @@ Then verify:
    `/swapfile` and its fstab entry after the first boot.
 2. First boot: verify network. If the NIC needs an out-of-tree driver
    (e.g. Realtek r8125 DKMS), the source tree is in the backup under
-   `home/realtek-r8125-dkms`.
+   `home/realtek-r8125-dkms`. **Do not restore module blacklists before
+   the module they exist for is built** — see below.
 3. Re-add data-disk mounts to `/etc/fstab` **by UUID and with
    `nofail`** — never by `/dev/nvmeXnY` path, and never without
    `nofail`: NVMe enumeration order is not stable, and a missing disk
    must not hang boot. For NTFS disks use the in-kernel `ntfs3`
    fstype instead of the ntfs-3g FUSE driver.
+
+### Module blacklists are a one-way trap on a fresh install
+
+An out-of-tree NIC driver only wins the device if the in-tree driver is
+kept out of the way. On this machine the RTL8125 2.5GbE port (`10ec:8125`)
+is claimed by **both** in-tree `r8169` and the `r8125` DKMS module, and
+`/etc/modprobe.d/blacklist.conf` carries a hand-appended `blacklist r8169`
+so the DKMS one binds.
+
+`blacklist <mod>` suppresses only *automatic, alias-driven* loading — udev
+skips the module when resolving a device's modalias. An explicit `modprobe
+r8169` still works, and so does loading as another module's dependency.
+Full suppression needs `install r8169 /bin/false`.
+
+Restoring that blacklist onto a fresh install **before** DKMS has built
+`r8125` for the new kernel leaves *nothing* claiming the NIC: not a slow
+link, not a down interface — no interface at all, on the machine you need
+online to bootstrap.
+
+Rules that follow:
+
+- `restore.sh` never auto-restores `/etc`, so this cannot happen by
+  accident. Keep it that way.
+- Prefer the in-tree driver. `lspci -nnk` lists every module claiming a
+  device (`Kernel modules: r8169, r8125`); if the in-tree one is listed,
+  the fresh install will come up unaided and the DKMS module is a
+  performance preference, not a requirement.
+- If the out-of-tree driver is genuinely wanted: build it first, confirm
+  `dkms status` shows it installed **for the running kernel**, and only
+  then add the blacklist.
+- Put it in **its own drop-in**, never in `blacklist.conf` — that file is
+  dpkg-owned (`kmod`), so a package upgrade raises a conffile prompt and
+  accepting the maintainer's version silently drops the line:
+
+  ```
+  # /etc/modprobe.d/r8125.conf
+  # RTL8125 (10ec:8125) is claimed by both in-tree r8169 and the r8125
+  # DKMS module. Blacklist r8169 so the DKMS driver binds the 2.5GbE port.
+  blacklist r8169
+  ```
+
+  A separate file survives upgrades and explains itself. The line in
+  `blacklist.conf` on the old system had no comment at all, wedged after
+  an unrelated `amd76x_edac` entry.
 
 ## Phase 4 — Bootstrap + restore
 

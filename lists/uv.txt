@@ -1,5 +1,6 @@
 auto-editor
 bump-my-version
 playwright
+poetry --with poetry-bumpversion
 ruff
 yt-dlp

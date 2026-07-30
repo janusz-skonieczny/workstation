@@ -58,7 +58,59 @@ echo "  never hang boot again. For NTFS disks use fstype 'ntfs3'"
 echo "  (in-kernel driver) instead of ntfs/ntfs-3g."
 
 # ---------------------------------------------------------------------------
-# 4. Re-authentication checklist — things a file copy cannot preserve.
+# 4. Bulk cloud-synced trees, pulled straight off the old disk.
+#
+#    backup.sh deliberately skips these (~109 GB) — they live in the cloud
+#    and would double the staging footprint. But re-downloading 103 GB of
+#    Drive takes hours and Google throttles, while NVMe->NVMe copy is
+#    minutes and leaves the sync clients only a local index pass.
+#
+#    The old drive is not wiped by the install, only disconnected — so
+#    reconnect it, mount the old /home read-only, and point OLD_HOME at
+#    your old home directory on it.
+# ---------------------------------------------------------------------------
+say "Bulk data from the old disk"
+
+BULK_PATHS=(GDrive Dropbox Videos Downloads)
+OLD_HOME="${OLD_HOME:-}"
+
+if [[ -z "$OLD_HOME" ]]; then
+    echo "  OLD_HOME not set — skipped. To pull them across:"
+    echo "    sudo mkdir -p /mnt/oldhome"
+    echo "    sudo mount -o ro UUID=<old-home-uuid> /mnt/oldhome"
+    echo "    OLD_HOME=/mnt/oldhome/$(id -un) migrate/restore.sh $SRC"
+    echo "  Old /home UUID, recorded by backup.sh at capture time:"
+    awk '$0 ~ /\/home$/ {printf "    %s\n", $0}' \
+        "$SRC/manifests/disks.txt" 2>/dev/null || true
+elif [[ ! -d "$OLD_HOME" ]]; then
+    echo "  OLD_HOME=$OLD_HOME not found — is the old disk mounted?" >&2
+    exit 1
+else
+    # Both clients rewrite their trees as they reconcile. Copying into a
+    # live sync folder races them and can push half-copied state upward.
+    for proc in insync dropbox; do
+        if pgrep -x "$proc" >/dev/null 2>&1; then
+            echo "  $proc is running — quit it before copying, then re-run." >&2
+            exit 1
+        fi
+    done
+
+    # --no-inc-recursive costs an upfront metadata scan but is what makes
+    # the percentage and ETA real; worth it on a copy this size.
+    for p in "${BULK_PATHS[@]}"; do
+        if [[ -d "$OLD_HOME/$p" ]]; then
+            echo "  $p"
+            rsync -a --info=progress2 --no-inc-recursive \
+                "$OLD_HOME/$p/" "$HOME/$p/"
+        else
+            echo "  $p  (absent on old disk, skipped)"
+        fi
+    done
+    echo "  Done — start Insync/Dropbox now and let them index, not re-download."
+fi
+
+# ---------------------------------------------------------------------------
+# 5. Re-authentication checklist — things a file copy cannot preserve.
 # ---------------------------------------------------------------------------
 say "Re-authentication checklist (run per tool as needed):"
 cat <<'CHECKLIST'

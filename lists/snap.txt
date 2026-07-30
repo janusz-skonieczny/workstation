@@ -1,4 +1,4 @@
-code
+code --classic
 slack
 pycharm-professional --classic
 webstorm --classic
@@ -6,7 +6,4 @@ obsidian --classic
 datagrip --classic
 pinta
 sublime-text --classic
-redis-insight
 redisinsight
-rambox
-youtube-music-desktop-app

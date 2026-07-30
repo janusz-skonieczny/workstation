@@ -10,7 +10,6 @@ legit
 pew
 pip-tools
 pipenv
-poetry
 pyupgrade
 tox
 transifex-client
