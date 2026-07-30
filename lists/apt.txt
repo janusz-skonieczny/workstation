@@ -21,6 +21,9 @@ curl
 default-jre
 dxvk
 fd-find
+# Hard runtime dep of whisper-srt, auto-editor and yt-dlp, but only ever
+# present as a transitive dependency — so autoremove could take it.
+ffmpeg
 figlet
 filelight
 fish
