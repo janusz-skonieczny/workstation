@@ -9,6 +9,7 @@ eza
 fnm
 gcloud-cli
 googleworkspace-cli
+openclaw/tap/gogcli
 helm
 helmfile
 k9s

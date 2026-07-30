@@ -188,8 +188,15 @@ ETC_PATHS=(
     apt/preferences.d
     default/grub
     sysctl.conf sysctl.d security/limits.d udev/rules.d modprobe.d modules-load.d
-    systemd/system docker/daemon.json
+    systemd/system systemd/journald.conf.d docker/daemon.json
     sddm.conf.d X11/xorg.conf.d profile.d cron.d
+    # Logging limits. A reinstall reverts these to the defaults that let
+    # /var/log/syslog reach 155G on a 194G root — see steps/06-logging.sh.
+    rsyslog.conf rsyslog.d logrotate.d
+    # OpenVPN 2 client/server configs, and the openvpn3 config store holding
+    # imported profiles. Without these a restore brings back an ENABLED
+    # openvpn.service pointing at nothing.
+    openvpn openvpn3
 )
 n=0
 total=${#ETC_PATHS[@]}
@@ -211,13 +218,23 @@ rsync -a /usr/share/keyrings/ "$TARGET/etc/usr-share-keyrings/"
 #    reinstalls the server from lists/apt.txt; no local database here
 #    holds anything worth carrying over), /etc/nordlayer and
 #    /etc/sudoers.d (re-provisioned by the installer and by hand
-#    respectively), /etc/netplan (a NetworkManager stub on this
-#    desktop — the real profiles are in NetworkManager/).
+#    respectively).
+#
+#    /etc/netplan is here, NOT excluded as it once was. The old note claimed
+#    it was "a NetworkManager stub — the real profiles are in
+#    NetworkManager/", which is backwards on netplan-backed NM (24.04+):
+#    /etc/netplan/90-NM-<uuid>.yaml is the persistent connection, while
+#    /run/NetworkManager/system-connections/netplan-NM-<uuid>.nmconnection is
+#    a generated copy on tmpfs. `nmcli ... FILENAME` reports only the /run
+#    path, which is why this looked like the storage location. It also
+#    explains why system-connections/ came back empty: nothing was there.
+#    The yaml files are 0600 root, hence this section rather than the loop.
 # ---------------------------------------------------------------------------
 if [[ "${WITH_SUDO:-0}" == "1" ]]; then
     say "Root-only configs -> $TARGET/etc (sudo)"
     sudo rsync -aR \
         /etc/./NetworkManager/system-connections \
+        /etc/./netplan \
         /etc/./ssh \
         /etc/./docker \
         "$TARGET/etc/" || true
@@ -244,6 +261,12 @@ MANIFESTS=(
     'dpkg-full.txt:dpkg -l'
     'snap.txt:snap list'
     'brew.txt:brew list --formula'
+    # brew.txt is ~100 auto-installed dependencies deep (libpng, boost,
+    # openssl@3 …), so it cannot be diffed against the curated lists/brew.txt.
+    # `leaves` lists only explicitly-installed formulae, which makes drift
+    # mechanical to spot — worktrunk and gogcli were both missing from the
+    # curated list and only surfaced when a command turned up absent.
+    'brew-leaves.txt:brew leaves'
     'brew-cask.txt:brew list --cask'
     'pipx.txt:pipx list --short'
     'uv-tools.txt:uv tool list'
