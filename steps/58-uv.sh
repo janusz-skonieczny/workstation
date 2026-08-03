@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.." || exit 1
 echo "----> Installing from lists/uv.txt"
 total=$(grep -cve '^[[:space:]]*$' lists/uv.txt)
 i=0
-while read -r package; do
+while read -r package || [ -n "$package" ]; do
     [ -z "$package" ] && continue
     i=$((i + 1))
     echo "**** [$i/$total] Installing $package with uv"

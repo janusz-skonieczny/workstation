@@ -32,7 +32,7 @@ fi
 echo "----> Installing Go CLIs from lists/go.txt"
 total=$(grep -cve '^[[:space:]]*#' -e '^[[:space:]]*$' lists/go.txt)
 i=0
-while read -r module; do
+while read -r module || [ -n "$module" ]; do
     case "$module" in
         ''|\#*) continue ;;
     esac

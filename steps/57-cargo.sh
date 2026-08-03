@@ -15,7 +15,7 @@ fi
 echo "----> Installing crates from lists/cargo.txt"
 total=$(grep -cve '^[[:space:]]*#' -e '^[[:space:]]*$' lists/cargo.txt)
 i=0
-while read -r crate; do
+while read -r crate || [ -n "$crate" ]; do
     case "$crate" in
         ''|\#*) continue ;;
     esac
