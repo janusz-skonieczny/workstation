@@ -13,6 +13,7 @@ run() {
 run steps/00-base.sh
 run steps/05-sysctl.sh
 run steps/06-logging.sh
+run steps/07-disks.sh
 run steps/10-apt.sh
 run steps/15-debs.sh
 
