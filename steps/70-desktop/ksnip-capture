@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+# Grab a screenshot with Spectacle, then hand it to ksnip for preview and
+# annotation.
+#
+# Why not call ksnip directly? Under Wayland ksnip loads WaylandImageGrabber,
+# which advertises only three capture modes, so ksnip registers only
+# --fullscreen, --current and --windowundercursor on the command line.
+# `ksnip --rectarea` answers "Unknown option 'rectarea'" and there is no
+# active-window mode at all — both exist solely in the X11 grabber. Spectacle
+# talks to KWin natively and covers every mode without an xdg-desktop-portal
+# consent prompt.
+#
+# Spectacle runs headless here (-b -n): no Spectacle window, no notification.
+# The only UI it shows is the region-selection overlay for `rect`. Everything
+# the eye lands on afterwards — preview, annotation, export — is ksnip.
+
+set -euo pipefail
+
+case "${1:-}" in
+    rect)   grab_mode=--region ;;
+    window) grab_mode=--activewindow ;;
+    screen) grab_mode=--current ;;
+    *)
+        echo "usage: ${0##*/} {rect|window|screen}" >&2
+        exit 2
+        ;;
+esac
+
+# XDG_RUNTIME_DIR is tmpfs and is wiped when the session ends, so captures
+# never outlive the login they were taken in. Older ones are pruned here
+# rather than by a trap: ksnip is a single-instance app, so the CLI call
+# returns as soon as the running instance accepts the path, which would race
+# a delete-on-exit against the load.
+capture_dir="${XDG_RUNTIME_DIR:-/tmp}/ksnip-capture"
+mkdir -p "$capture_dir"
+find "$capture_dir" -maxdepth 1 -name '*.png' -mmin +60 -delete 2>/dev/null || true
+
+shot="$(mktemp "$capture_dir/shot-XXXXXXXX.png")"
+
+# Spectacle leaves the file empty when the region overlay is dismissed with
+# ESC, and its exit status does not distinguish that from a real failure.
+# Treat "nothing was captured" as a silent cancel so no empty editor pops up.
+spectacle "$grab_mode" --background --nonotify --output "$shot" || true
+
+if [[ ! -s "$shot" ]]; then
+    rm -f "$shot"
+    exit 0
+fi
+
+exec ksnip --edit "$shot"
