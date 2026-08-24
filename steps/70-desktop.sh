@@ -85,3 +85,5 @@ if qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null; then
 else
     echo "     KWin not running — applies on next login"
 fi
+
+bash "$(dirname "$0")/70-desktop/ksnip-shortcuts.sh"
