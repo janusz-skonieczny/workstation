@@ -15,6 +15,7 @@ run steps/05-sysctl.sh
 run steps/06-logging.sh
 run steps/07-disks.sh
 run steps/10-apt.sh
+run steps/12-earlyoom.sh
 run steps/15-debs.sh
 
 for repo in steps/20-repos/*.sh; do
