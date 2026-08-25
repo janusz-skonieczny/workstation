@@ -25,8 +25,21 @@ fs.inotify.max_user_watches=1048576
 # One instance per watching process. kind/Kubernetes clusters spawn enough
 # of them to exhaust the KDE-imposed 256.
 fs.inotify.max_user_instances=8192
+
+# Magic SysRq. The distro default 176 (sync + remount-ro + reboot) omits
+# the signalling bit, so Alt+SysRq+F — manual OOM kill, the one key that
+# works when the UI is frozen solid — is dead exactly when it's needed;
+# the 2026-08-25 agent-memory freeze forced a hard reboot because of it.
+# 244 = 176 + 64 (signal/oom-kill keys) + 4 (keyboard control). Proven
+# the same day: SysRq+F recovered the session by killing the top hog.
+kernel.sysrq=244
 CONF
+
+# Absorbed into the block above; hand-created during the 2026-08-25
+# incident response, would shadow nothing (99- sorts last) but is noise.
+sudo rm -f /etc/sysctl.d/90-sysrq.conf
 
 sudo sysctl --system > /dev/null
 
 echo "----> inotify now: $(sysctl -n fs.inotify.max_user_watches) watches, $(sysctl -n fs.inotify.max_user_instances) instances"
+echo "----> sysrq mask: $(sysctl -n kernel.sysrq)"
