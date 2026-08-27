@@ -143,6 +143,10 @@ EXCLUDES+=(
     # indexes are in .cache/, which this allowlist never touches.
     # manifests/jetbrains-plugins.txt records which plugins to re-add.
     --exclude '.local/share/JetBrains'
+    # Dead X11 Huion helper (xinput/xsetwacom htablet function). Wayland has
+    # no equivalent and steps/70-desktop/huion-tablet.sh replaces it — carrying
+    # it forward would only put a broken function back on the new machine.
+    --exclude '.config/fish/conf.d/huion.fish'
     --exclude '.config/**/Service Worker'
     --exclude '.config/**/IndexedDB'
 )
