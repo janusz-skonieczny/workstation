@@ -42,6 +42,9 @@ gnupg-agent
 golang-go
 gparted
 graphviz
+# Screen annotation driven by the Huion pad buttons — KWin's Mouse Mark
+# effect ignores tablet pens on Wayland (KDE bug 505414). Needs universe.
+gromit-mpx
 handbrake
 handbrake-cli
 htop
