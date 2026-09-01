@@ -1,5 +1,6 @@
 auto-editor
 bump-my-version
+piper-tts
 playwright
 poetry --with poetry-bumpversion
 ruff
