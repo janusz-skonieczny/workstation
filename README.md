@@ -28,6 +28,7 @@ idempotent and safe to re-run:
 | `56-go.sh` | go CLIs | `lists/go.txt` |
 | `57-cargo.sh` | cargo crates | `lists/cargo.txt` |
 | `58-uv.sh` | uv-managed CLI tools | `lists/uv.txt` |
+| `59-piper.sh` | Piper TTS voice model | — |
 | `60-shell.sh` | fish + oh-my-fish | `fish_setup.fish` |
 | `70-desktop.sh` | fonts, theme, locales | — |
 
