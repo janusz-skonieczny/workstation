@@ -56,10 +56,12 @@ cat <<USAGE
 ----> Usage
   say "the build is green"           # fish function, streams to the speakers
   git log -1 --format=%s | say       # or from a pipe
-  kokoro notes.txt out.wav --voice af_heart
+  kokoro notes.txt out.wav            # en-US af_heart unless told otherwise
   kokoro notes.txt --stream --speed 1.2
   kokoro book.epub --split-output ./chunks/ --format mp3
-  kokoro --help-voices               # 48 voices; en_US are af_* and am_*
+  kokoro --help-voices                # 48 voices; en_US are af_* and am_*
+  # override for one call, or per-shell with KOKORO_VOICE
+  kokoro notes.txt out.wav --voice am_adam
   # blend two voices by weight
   kokoro notes.txt out.wav --voice "af_sarah:60,am_adam:40"
 
