@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# kokoro-tts resolves kokoro-v1.0.onnx and voices-v1.0.bin relative to the
+# *current working directory* and offers no environment-variable override, so
+# the bare CLI only ever works from the one directory the 350 MB of model data
+# happens to sit in — and it fails the same way for `--help-voices`, which
+# needs the voice pack loaded just to list names. This wrapper injects the
+# paths so `kokoro` works from anywhere.
+#
+# The flags are appended, not prepended: kokoro-tts takes the input file as a
+# positional argument and a leading `--model <path>` would be consumed as that
+# positional. Appending also means an explicit --model/--voices from the caller
+# would lose to ours (argparse keeps the last occurrence), so we skip our own
+# when the caller supplied either — pass both if you pass one.
+
+set -euo pipefail
+
+data_dir=${KOKORO_DATA_DIR:-$HOME/.local/share/kokoro}
+model="$data_dir/kokoro-v1.0.onnx"
+voices="$data_dir/voices-v1.0.bin"
+
+caller_set_paths=false
+for arg in "$@"; do
+    case "$arg" in
+        --model | --voices) caller_set_paths=true ;;
+    esac
+done
+
+if [ "$caller_set_paths" = true ]; then
+    exec kokoro-tts "$@"
+fi
+
+for f in "$model" "$voices"; do
+    if [ ! -f "$f" ]; then
+        echo "!!!! missing $f — run steps/59a-kokoro.sh to fetch the model data" >&2
+        exit 1
+    fi
+done
+
+exec kokoro-tts "$@" --model "$model" --voices "$voices"
