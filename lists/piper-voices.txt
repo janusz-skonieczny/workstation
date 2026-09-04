@@ -1,0 +1,11 @@
+# Piper voice models fetched by steps/59-piper.sh, one per line.
+# Blank lines and #comments are skipped.
+#
+# Browse the catalogue with:
+#   ~/.local/share/uv/tools/piper-tts/bin/python -m piper.download_voices
+# Each name expands to a .onnx and a .onnx.json; the step treats a voice as
+# present only when it has both.
+
+# English default — what the usage examples use, and the voice Dev10x:tts
+# narration resolves to. Override for one run with PIPER_VOICE.
+en_US-ryan-medium
