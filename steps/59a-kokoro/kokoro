@@ -7,11 +7,19 @@
 # needs the voice pack loaded just to list names. This wrapper injects the
 # paths so `kokoro` works from anywhere.
 #
-# The flags are appended, not prepended: kokoro-tts takes the input file as a
+# It also injects a voice. kokoro-tts defaults --voice to an *interactive*
+# picker, which hangs any non-interactive call — a script, a pipe, a cron job —
+# on a menu nobody is there to answer. af_heart is the en-US default here;
+# `--lang` is left alone because en-us is already kokoro-tts's own default.
+# Override per-call with --voice, or per-shell with KOKORO_VOICE; blends work
+# in both, e.g. "af_sarah:60,am_adam:40".
+#
+# Flags are appended, not prepended: kokoro-tts takes the input file as a
 # positional argument and a leading `--model <path>` would be consumed as that
-# positional. Appending also means an explicit --model/--voices from the caller
-# would lose to ours (argparse keeps the last occurrence), so we skip our own
-# when the caller supplied either — pass both if you pass one.
+# positional. Appending also means our value would beat the caller's (argparse
+# keeps the last occurrence), so each injection is skipped when the caller
+# supplied it. --model and --voices are treated as one pair: pass both or
+# neither.
 
 set -euo pipefail
 
@@ -20,21 +28,35 @@ model="$data_dir/kokoro-v1.0.onnx"
 voices="$data_dir/voices-v1.0.bin"
 
 caller_set_paths=false
+caller_set_voice=false
+# The informational commands render from the voice pack and take no input
+# file, so a --voice they do not expect is only a chance to break them.
+informational=false
+
 for arg in "$@"; do
     case "$arg" in
-        --model | --voices) caller_set_paths=true ;;
+        --model | --model=* | --voices | --voices=*) caller_set_paths=true ;;
+        --voice | --voice=*) caller_set_voice=true ;;
+        -h | --help | --help-voices | --help-languages | -v | --version)
+            informational=true
+            ;;
     esac
 done
 
-if [ "$caller_set_paths" = true ]; then
-    exec kokoro-tts "$@"
+args=("$@")
+
+if [ "$caller_set_paths" = false ]; then
+    for f in "$model" "$voices"; do
+        if [ ! -f "$f" ]; then
+            echo "!!!! missing $f — run steps/59a-kokoro.sh to fetch the model data" >&2
+            exit 1
+        fi
+    done
+    args+=(--model "$model" --voices "$voices")
 fi
 
-for f in "$model" "$voices"; do
-    if [ ! -f "$f" ]; then
-        echo "!!!! missing $f — run steps/59a-kokoro.sh to fetch the model data" >&2
-        exit 1
-    fi
-done
+if [ "$caller_set_voice" = false ] && [ "$informational" = false ]; then
+    args+=(--voice "${KOKORO_VOICE:-af_heart}")
+fi
 
-exec kokoro-tts "$@" --model "$model" --voices "$voices"
+exec kokoro-tts "${args[@]}"
