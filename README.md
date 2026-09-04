@@ -29,6 +29,7 @@ idempotent and safe to re-run:
 | `57-cargo.sh` | cargo crates | `lists/cargo.txt` |
 | `58-uv.sh` | uv-managed CLI tools | `lists/uv.txt` |
 | `59-piper.sh` | Piper TTS voice model | — |
+| `59a-kokoro.sh` | Kokoro TTS model data, `kokoro` wrapper, fish `say` | `steps/59a-kokoro/` |
 | `60-shell.sh` | fish + oh-my-fish | `fish_setup.fish` |
 | `70-desktop.sh` | fonts, theme, locales | — |
 

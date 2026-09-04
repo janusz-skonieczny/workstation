@@ -1,5 +1,6 @@
 auto-editor
 bump-my-version
+kokoro-tts --python 3.12
 piper-tts
 playwright
 poetry --with poetry-bumpversion
