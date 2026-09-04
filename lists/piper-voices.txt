@@ -9,3 +9,16 @@
 # English default — what the usage examples use, and the voice Dev10x:tts
 # narration resolves to. Override for one run with PIPER_VOICE.
 en_US-ryan-medium
+
+# Polish. Kokoro has no Polish voice at all — its model covers en, es, fr,
+# hi, it, ja, pt-BR and zh, and the pf_/pm_ voices are Brazilian Portuguese,
+# not Polish — so Piper is the only Polish engine on this machine.
+#
+# bass is the Polish default: the one high-quality model of the five, and
+# the best of them on this desk. The rest are kept so a voice can be tried
+# or swapped without waiting on a download.
+pl_PL-bass-high
+pl_PL-darkman-medium
+pl_PL-gosia-medium
+pl_PL-mc_speech-medium
+pl_PL-mls_6892-low
