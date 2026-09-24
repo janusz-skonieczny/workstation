@@ -31,3 +31,4 @@ watchman
 uv
 worktrunk
 yq
+zellij
