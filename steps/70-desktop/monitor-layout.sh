@@ -77,6 +77,21 @@ else
     echo "     $config missing — KWin writes it on first login"
 fi
 
+# The login screen runs its own kwin_wayland as the sddm user, which keeps
+# a separate kwinoutputconfig.json and lays the monitors out from scratch:
+# DP-1 (physically right) lands on the left and the cursor leaves each
+# screen on the wrong edge. Hand it the same setups and the same edge
+# barrier as the session. Outputs are matched by EDID, so the file is
+# portable between the two users on this machine.
+sddm_config="$(getent passwd sddm | cut -d: -f6 || true)/.config"
+if [ -f "$config" ] && [ "$sddm_config" != "/.config" ]; then
+    echo "----> Copying the monitor row to the login screen"
+    sudo install -d -o sddm -g sddm -m 755 "$sddm_config"
+    sudo install -o sddm -g sddm -m 644 "$config" "$sddm_config/kwinoutputconfig.json"
+    sudo -u sddm kwriteconfig6 --file "$sddm_config/kwinrc" --group EdgeBarrier --key EdgeBarrier 0
+    echo "     applies on the next login screen"
+fi
+
 # Blank the screens after an hour idle on AC. Keys from
 # powerdevilprofilesettings.kcfg, group [AC][Display]. The locked-screen
 # timeout keeps its default so a locked desk still blanks quickly.
