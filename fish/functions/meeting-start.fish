@@ -3,7 +3,7 @@ function meeting-start --description 'Start a voxtype meeting transcription (pro
     set -l statefile "$HOME/.local/state/voxtype-meeting.state"
 
     if not test -f "$config"
-        echo "voxtype config not found at $config — run steps/59-voxtype.sh" >&2
+        echo "voxtype config not found at $config — run steps/59b-voxtype.sh" >&2
         return 1
     end
 
