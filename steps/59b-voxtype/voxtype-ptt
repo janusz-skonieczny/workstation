@@ -1,0 +1,52 @@
+#!/usr/bin/python3
+
+# Push-to-talk for voxtype on the Microsoft keyboard's Documents key
+# (installed by steps/59b-voxtype.sh, run by voxtype-ptt.service).
+#
+# The extra keys arrive on a separate "Consumer Control" device with no letter
+# keys, and voxtype's own hotkey listener only opens devices that have them.
+# keyd could re-emit the key on a virtual keyboard, but it cannot single out
+# that device across reboots: keyd 2.5 gave it a different id for each
+# /dev/input/eventN it landed on (its log shows the long name running into
+# that path, so the hash likely covers both). Matching
+# the whole keyboard instead puts every keystroke through keyd, and that broke
+# the Print screenshot shortcuts.
+#
+# This listener only reads the device (no grab), so KDE keeps seeing every key,
+# and it finds the device by name on each start, so event numbers never matter.
+# A missing or vanished device is an error exit; systemd restarts the service
+# until the keyboard's receiver is back.
+
+import subprocess
+import sys
+
+import evdev
+
+DEVICE_NAME = "Microsoft Microsoft Wireless Optical Desktop® 1.00 Consumer Control"
+KEY_RELEASED = 0
+KEY_PRESSED = 1
+
+
+def find_device(name: str) -> evdev.InputDevice:
+    for path in evdev.list_devices():
+        device = evdev.InputDevice(path)
+        if device.name == name:
+            return device
+        device.close()
+    sys.exit(f"voxtype-ptt: no input device named {name!r}")
+
+
+def main() -> None:
+    device = find_device(name=DEVICE_NAME)
+    print(f"voxtype-ptt: listening on {device.path}", flush=True)
+    for event in device.read_loop():
+        if event.type != evdev.ecodes.EV_KEY or event.code != evdev.ecodes.KEY_DOCUMENTS:
+            continue
+        if event.value == KEY_PRESSED:
+            subprocess.run(["voxtype", "record", "start"], check=False)
+        elif event.value == KEY_RELEASED:
+            subprocess.run(["voxtype", "record", "stop"], check=False)
+
+
+if __name__ == "__main__":
+    main()

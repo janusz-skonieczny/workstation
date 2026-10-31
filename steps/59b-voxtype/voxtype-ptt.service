@@ -1,0 +1,11 @@
+[Unit]
+Description=Push-to-talk for voxtype on the keyboard's Documents key
+After=voxtype.service
+
+[Service]
+ExecStart=%h/.local/bin/voxtype-ptt
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

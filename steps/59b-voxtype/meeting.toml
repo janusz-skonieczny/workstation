@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------------
 # Meeting mode — continuous call transcription (managed by workstation
-# steps/59-voxtype.sh). Drives `voxtype meeting …` via the meeting-* fish
+# steps/59b-voxtype.sh). Drives `voxtype meeting …` via the meeting-* fish
 # functions. loopback_device="auto" captures SYSTEM audio (the remote side of
 # a call) so it works for any app — Slack huddle, Google Chat/Meet, Zoom.
 # ----------------------------------------------------------------------------
