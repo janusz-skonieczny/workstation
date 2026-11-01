@@ -1,0 +1,19 @@
+# Managed by workstation/steps/63-node-reaper.sh — edit there, not here.
+[Unit]
+Description=Cap the number and memory of a user's node processes
+Documentation=file:///usr/local/bin/node-reaper
+
+[Service]
+ExecStart=/usr/local/bin/node-reaper
+EnvironmentFile=/etc/default/node-reaper
+Restart=always
+RestartSec=2
+# Root, not a user unit: it must outlive the memory pressure it exists to
+# relieve, so the kernel OOM killer never picks it and it keeps CPU time
+# while node workers saturate every core.
+OOMScoreAdjust=-1000
+Nice=-10
+MemoryMax=64M
+
+[Install]
+WantedBy=multi-user.target

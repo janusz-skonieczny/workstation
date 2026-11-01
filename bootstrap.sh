@@ -35,4 +35,5 @@ run steps/59a-kokoro.sh
 run steps/59b-voxtype.sh
 run steps/60-shell.sh
 run steps/62-agents.sh
+run steps/63-node-reaper.sh
 run steps/70-desktop.sh
